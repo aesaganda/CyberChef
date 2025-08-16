@@ -1,0 +1,32 @@
+name: Sync Fork with Upstream CyberChef
+
+on:
+  schedule:
+    - cron: '0 0 * * *'     # Runs every day at midnight UTC
+  workflow_dispatch:       # Allows manual trigger via GitHub UI
+
+permissions:
+  contents: write          # Grants push access to the repo
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout your fork (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up upstream remote
+        run: |
+          git remote add upstream https://github.com/gchq/CyberChef.git
+          git fetch upstream
+
+      - name: Sync main branch
+        run: |
+          git fetch upstream main
+          git checkout -B main origin/main
+          git merge upstream/main --no-edit
+          git push origin main
+
+      # Optional: add similar blocks for other branches if needed
